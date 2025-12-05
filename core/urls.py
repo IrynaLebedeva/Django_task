@@ -15,17 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from task_manager.views.task import (create_task, get_tasks,
-get_task_detail, get_tasks_statistics)
-from task_manager.views.subtask import SubTaskListCreateView, SubTaskDetailUpdateDeleteView
+from django.urls import path,include
+# from task_manager.views.task import (create_task, get_tasks,
+# get_task_detail, get_tasks_statistics)
+# from task_manager.views.subtask import SubTaskListCreateView, SubTaskDetailUpdateDeleteView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/tasks_c/', create_task),
-    path('api/v1/tasks_g/', get_tasks),
-    path('api/v1/tasks/<int:pk>/', get_task_detail),
-    path('api/v1/tasks_stats/', get_tasks_statistics),
-    path('api/v1/subtasks_c/', SubTaskListCreateView.as_view()),
-    path('api/v1/subtasks/<int:pk>/', SubTaskDetailUpdateDeleteView.as_view()),
+    path('api/v1/', include("routers")),
+    # path('api/v1/tasks_c/', create_task),
+    # path('api/v1/tasks_g/', get_tasks),
+    # path('api/v1/tasks/<int:pk>/', get_task_detail),
+    # path('api/v1/tasks_stats/', get_tasks_statistics),
+    # path('api/v1/subtasks_c/', SubTaskListCreateView.as_view()),
+    # path('api/v1/subtasks/<int:pk>/', SubTaskDetailUpdateDeleteView.as_view()),
 ]

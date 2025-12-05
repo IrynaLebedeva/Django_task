@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
+from rest_framework.views import APIView
 
 from task_manager.models import Task
 from task_manager.serializers.task import TaskSerializer
@@ -39,3 +40,80 @@ def get_tasks_statistics(request):
     tasks_done = tasks.filter(Q(status="done") & Q(deadline__lt=timezone.now())).count()
 
     return Response({"total_tasks": total_tasks, "tasks_status": tasks_status, "tasks_done": tasks_done})
+
+class TaskListDayAPIView(APIView):
+    # WEEKDAYS = {
+    #     "sunday": 1,
+    #     "monday": 2,
+    #     "tuesday": 3,
+    #     "wednesday": 4,
+    #     "thursday": 5,
+    #     "friday": 6,
+    #     "saturday": 7
+    # }
+    #
+    # def get(self, request):
+    #
+    #     day = request.query_params.get("weekday")
+    #
+    #     if not day:
+    #         tasks = Task.objects.all()
+    #         serializer = TaskSerializer(tasks, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    #     day_ = day.lower()
+    #
+    #     if day not in self.WEEKDAYS:
+    #         return Response({"error": "Invalid weekday.Pls write 'monday','friday'"},
+    #                         status=status.HTTP_400_BAD_REQUEST)
+    #
+    #     day_index = self.WEEKDAYS[day]
+    #
+    #     tasks = Task.objects.filter(deadline__weekday=day_index)
+    #     serializer = TaskSerializer(tasks, many=True)
+    #
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    WEEKDAYS = {
+        "monday": 1,
+        "tuesday": 2,
+        "wednesday": 3,
+        "thursday": 4,
+        "friday": 5,
+        "saturday": 6,
+        "sunday": 7,
+        "понедельник": 0,
+        "вторник": 1,
+        "среда": 2,
+        "четверг": 3,
+        "пятница": 4,
+        "суббота": 5,
+        "воскресенье": 6,
+    }
+
+    def get(self, request):
+        weekday_param = request.query_params.get("weekday")
+
+        # Если параметр не передан — выдаем все задачи
+        if not weekday_param:
+            tasks = Task.objects.all()
+            serializer = TaskSerializer(tasks, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        weekday_param = weekday_param.lower()
+
+        # Проверяем существование дня недели
+        if weekday_param not in self.WEEKDAYS:
+            return Response(
+                {"error": "Invalid weekday. Use names like 'monday' or 'вторник'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        weekday_index = self.WEEKDAYS[weekday_param]
+
+        # Получаем задачи с нужным днём недели
+        tasks = Task.objects.filter(deadline__week_day=weekday_index + 1)
+        # В Django week_day: Sunday=1 ... Saturday=7, поэтому +1
+
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

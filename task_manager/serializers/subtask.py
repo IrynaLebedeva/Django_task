@@ -13,5 +13,5 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
 class SubTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTask
-        fields = ("id", "title", "description", "status", "deadline", "created_at")
+        fields = ("id", "title", "description", "status", "deadline", "created_at")# можно убрать "description", "created_at"
 
