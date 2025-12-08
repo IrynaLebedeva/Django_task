@@ -8,8 +8,8 @@ from rest_framework.routers import DefaultRouter, SimpleRouter
 
 router = DefaultRouter()
 # router.register('categpory', ...)
-# router.register('subtask', PostViewSet, basename='posts')
-# router.register('events', EventViewSet, basename='events')
+# router.register('subtask', SubTaskViewSet, basename='subtask')
+# router.register('task', TasksViewSet, basename='task')
 
 
 urlpatterns = [
