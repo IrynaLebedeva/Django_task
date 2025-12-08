@@ -1,13 +1,19 @@
-from django.db.models import Count, Q
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from django.utils import timezone
-from rest_framework.views import APIView
+# from django.db.models import Count, Q
+# from rest_framework.decorators import api_view
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+# from rest_framework.response import Response
+# from rest_framework import status
+# from django.utils import timezone
+# from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+
+from paginators import TasksPagination
 
 from task_manager.models import Task
-from task_manager.serializers.task import TaskSerializer
+from task_manager.serializers.task import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer
 
+"""
 @api_view(['POST'])
 def create_task(request):
     serializer = TaskSerializer(data=request.data)
@@ -116,4 +122,40 @@ class TaskListDayAPIView(APIView):
 
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+"""
+class TaskListCreateView(ListCreateAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['status', 'deadline']
+    search_fields = ['title', 'description']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+    pagination_class = TasksPagination
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return TaskCreateSerializer
+        return TaskSerializer
+
+
+
+class TaskDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskDetailSerializer
+
+
+
+
+
+
+
+
+
+
+
+
+
 
