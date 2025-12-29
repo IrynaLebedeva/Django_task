@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import PROTECT
+from django.utils import timezone
 
 CHOISE_STATUS = [
     ("new", "новая"),
@@ -9,8 +10,18 @@ CHOISE_STATUS = [
     ('done', 'выполнена'),
 ]
 
+class CategoryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
 class Category(models.Model):
-    name = models.CharField(max_length=50, verbose_name="Название категории")
+    name = models.CharField(max_length=50, unique=True, verbose_name="Название категории")
+
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
+    objects = CategoryManager()
+    all_objects = models.Manager()
 
     class Meta:
         db_table = 'task_manager_category'
@@ -20,6 +31,12 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    def delete(self, using=None, keep_parents=False):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
+
 
 
 class Task(models.Model):
