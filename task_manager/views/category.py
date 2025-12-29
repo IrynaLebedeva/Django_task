@@ -12,6 +12,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def count_tasks(self, request):
-        categories = Category.objects.annotate(tasks_count=Count('tasks')).order_by()
+        categories = Category.objects.filter(is_deleted=False).annotate(tasks_count=Count('tasks')).order_by('name')
         result = {category.name: category.tasks_count for category in categories}
         return Response(result)
