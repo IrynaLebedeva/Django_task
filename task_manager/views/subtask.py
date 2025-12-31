@@ -5,7 +5,7 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from paginators import SubTasksPagination
 from task_manager.models import SubTask
@@ -90,6 +90,7 @@ class SubTaskListCreateView(ListCreateAPIView):
     ordering_fields = ['created_at']
     ordering = ['-created_at']
     pagination_class = SubTasksPagination
+    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -100,6 +101,11 @@ class SubTaskListCreateView(ListCreateAPIView):
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
     serializer_class = SubTaskSerializer
+
+    def get_permissions(self):
+        if self.action == 'destroy':
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
 
 
 
