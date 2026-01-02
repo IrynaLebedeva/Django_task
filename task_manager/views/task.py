@@ -1,6 +1,6 @@
 # from django.db.models import Count, Q
 # from rest_framework.decorators import api_view
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 # from rest_framework.response import Response
 # from rest_framework import status
 # from django.utils import timezone
@@ -8,10 +8,12 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
 
 from paginators import TasksPagination
 
 from task_manager.models import Task
+from task_manager.permissions import IsOwner
 from task_manager.serializers.task import TaskSerializer, TaskDetailSerializer, TaskCreateSerializer
 
 """
@@ -142,17 +144,36 @@ class TaskListCreateView(ListCreateAPIView):
             return TaskCreateSerializer
         return TaskSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 
 class TaskDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskDetailSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff:    # админ видит все
+            return Task.objects.all()
+        return Task.objects.filter(owner=user) # пользователь видит только свои задачи
 
     def get_permissions(self):
-        if self.action == 'destroy':
-            return [IsAdminUser()]
-        return [IsAuthenticated()]
+        if self.request.method == 'DELETE':
+            return [IsAdminUser]
+        return [IsAuthenticated, IsOwner]
+
+
+class UserTasksView(ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Task.objects.filter(owner=user)
+
 
 
 

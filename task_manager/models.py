@@ -1,6 +1,10 @@
 from django.db import models
 from django.db.models import PROTECT
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 CHOISE_STATUS = [
     ("new", "новая"),
@@ -46,6 +50,7 @@ class Task(models.Model):
     status = models.CharField(max_length=15, choices=CHOISE_STATUS, verbose_name="Статус задачи")
     deadline = models.DateTimeField(verbose_name="Дата и время дедлайн")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task', default=1)
 
     class Meta:
         db_table = 'task_manager_task'
@@ -67,6 +72,7 @@ class SubTask(models.Model):
     status = models.CharField(max_length=20, choices=CHOISE_STATUS, verbose_name="Статус подзадачи")
     deadline = models.DateTimeField(verbose_name="Дата и время дедлайн")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subtask', default=1)
 
     class Meta:
         db_table = 'tasks_manager_subtask'

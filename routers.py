@@ -18,6 +18,7 @@ urlpatterns = [
     # path('category/', include('task_manager.urls.category')),
     path('subtask/', include('task_manager.urls.subtask')),
     path('task/', include('task_manager.urls.task')),
+    path('user/', include('task_manager.urls.user')),
     path('jwt-auth/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('jwt-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ] + router.urls
