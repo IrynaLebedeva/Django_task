@@ -3,7 +3,7 @@ from django.urls import path, re_path
 # from task_manager.views.task import (create_task, get_tasks,
 # get_task_detail, get_tasks_statistics)
 # from task_manager.views.task import TaskListDayAPIView
-from task_manager.views.task import TaskListCreateView, TaskDetailView
+from task_manager.views.task import TaskListCreateView, TaskDetailView, UserTasksView
 
 
 
@@ -16,4 +16,5 @@ urlpatterns = [
     # path('', TaskListDayAPIView.as_view()),
     path('', TaskListCreateView.as_view()),
     path('<int:pk>/', TaskDetailView.as_view()),
+    path('user_tasks/', UserTasksView.as_view(), name='user_tasks')
 ]

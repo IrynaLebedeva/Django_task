@@ -6,9 +6,11 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.db.models import Q
 
 from paginators import SubTasksPagination
 from task_manager.models import SubTask
+from task_manager.permissions import IsSubTaskOwnerOrTaskOwner
 from task_manager.serializers.subtask import SubTaskCreateSerializer, SubTaskSerializer
 
 # class SubTaskListCreateView(APIView):
@@ -82,7 +84,6 @@ from task_manager.serializers.subtask import SubTaskCreateSerializer, SubTaskSer
 #             return Response({"error": "Subtask not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class SubTaskListCreateView(ListCreateAPIView):
-    queryset = SubTask.objects.all()
     serializer_class = SubTaskSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['status', 'deadline']
@@ -92,20 +93,39 @@ class SubTaskListCreateView(ListCreateAPIView):
     pagination_class = SubTasksPagination
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff:
+            return SubTask.objects.all()
+        return SubTask.objects.filter(Q(owner=user) | Q(task__owner=user))
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return SubTaskCreateSerializer
         return SubTaskSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
-    queryset = SubTask.objects.all()
     serializer_class = SubTaskSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_staff:
+            return SubTask.objects.all()
+        return SubTask.objects.filter(Q(owner=user) | Q(task__owner=user))
+
     def get_permissions(self):
-        if self.action == 'destroy':
-            return [IsAdminUser()]
-        return [IsAuthenticated()]
+        if self.request.method == 'DELETE':
+            if self.request.user.is_staff:
+                return [IsAdminUser]
+            return [IsAuthenticated, IsSubTaskOwnerOrTaskOwner]
+
+        return [IsAuthenticated, IsSubTaskOwnerOrTaskOwner]
 
 
 

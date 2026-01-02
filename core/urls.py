@@ -19,6 +19,14 @@ from django.urls import path,include
 # from task_manager.views.task import (create_task, get_tasks,
 # get_task_detail, get_tasks_statistics)
 # from task_manager.views.subtask import SubTaskListCreateView, SubTaskDetailUpdateDeleteView
+from rest_framework import permissions
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +37,9 @@ urlpatterns = [
     # path('api/v1/tasks_stats/', get_tasks_statistics),
     # path('api/v1/subtasks_c/', SubTaskListCreateView.as_view()),
     # path('api/v1/subtasks/<int:pk>/', SubTaskDetailUpdateDeleteView.as_view()),
+
+    # Swagger / Redoc
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema')),
 ]

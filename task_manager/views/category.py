@@ -11,7 +11,7 @@ from task_manager.serializers import CategoryCreateSerializer
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategoryCreateSerializer
-    permission_classes = [IsAdminUser()]
+    permission_classes = [IsAdminUser]
 
     @action(detail=False, methods=['get'])
     def count_tasks(self, request):

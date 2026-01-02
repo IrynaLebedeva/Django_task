@@ -11,7 +11,9 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
         fields = ('title', 'description','task', 'status', 'deadline', 'created_at',)
 
 class SubTaskSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.id')
+
     class Meta:
         model = SubTask
-        fields = ("id", "title", "description", "status", "deadline", "created_at")# можно убрать "description", "created_at"
+        fields = ("id", "title", "description", "status", "deadline", "created_at", "owner")# можно убрать "description", "created_at"
 
