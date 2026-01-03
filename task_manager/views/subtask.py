@@ -94,6 +94,9 @@ class SubTaskListCreateView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return SubTask.objects.none()
+
         user = self.request.user
 
         if user.is_staff:
